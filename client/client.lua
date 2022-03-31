@@ -108,7 +108,7 @@ function OpenMenu()
     ESX.UI.Menu.CloseAll()
 
     ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'garage',{
-        title = 'Coches Policia',
+        title = 'Vehículos Policia',
         align = 'bottom-right',
         elements = vehicles
     },
