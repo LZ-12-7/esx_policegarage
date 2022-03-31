@@ -13,3 +13,11 @@ Este script esta hecho por mi, no me molesta si lo publicais por cualquier lado 
 
 [Otro]
 Discord: https://discord.gg/98hwCGSNyJ
+
+[Cosas]
+
+Cuando spawneas un vehículo siempre te aparecerá con 100 de gasolina y spawnearas dentro del vehículo
+
+[Dependencias]
+
+LegacyFuel y ESX
