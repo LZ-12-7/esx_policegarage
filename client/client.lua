@@ -10,7 +10,7 @@ end)
 
 AddEventHandler('onResourceStart', function(resource)
     if resource == GetCurrentResourceName() then
-        TriggerServerEvent('esx_ambulancegarage:getJob')
+        TriggerServerEvent('esx_policegarage:getJob')
     end
 end)
 
