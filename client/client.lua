@@ -7,6 +7,13 @@ local job = nil
 AddEventHandler('playerSpawned', function(spawn)
 	TriggerServerEvent('esx_policegarage:getJob')
 end)
+
+AddEventHandler('onResourceStart', function(resource)
+    if resource == GetCurrentResourceName() then
+        TriggerServerEvent('esx_ambulancegarage:getJob')
+    end
+end)
+
 RegisterNetEvent('esx:setJob')
 AddEventHandler('esx:setJob', function(job)
   	TriggerServerEvent('esx_policegarage:getJob')
