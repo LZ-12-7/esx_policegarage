@@ -1,32 +1,7 @@
+local ESX = exports['es_extended']:getSharedObject()
 local lugar = {x=453.8625, y=-1017.06, z=28.844}
 local lugar2 = {x=462.8166, y=-1019.99, z=28.744}
 local x, y, z = table.unpack(GetEntityCoords(PlayerPedId(), true))
-local isPolice = false
-local job = nil
-
-AddEventHandler('playerSpawned', function(spawn)
-	TriggerServerEvent('esx_policegarage:getJob')
-end)
-
-AddEventHandler('onResourceStart', function(resource)
-    if resource == GetCurrentResourceName() then
-        TriggerServerEvent('esx_policegarage:getJob')
-    end
-end)
-
-RegisterNetEvent('esx:setJob')
-AddEventHandler('esx:setJob', function(job)
-  	TriggerServerEvent('esx_policegarage:getJob')
-end)
-
-ESX = nil
-
-Citizen.CreateThread(function()
-    while ESX == nil do
-	TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-	Citizen.Wait(0)
-    end
-end)
 
 Keys = {
     ["ESC"]       = 322,  ["F1"]        = 288,  ["F2"]        = 289,  ["F3"]        = 170,  ["F5"]  = 166,  ["F6"]  = 167,  ["F7"]  = 168,  ["F8"]  = 169,  ["F9"]  = 56,   ["F10"]   = 57, 
@@ -42,41 +17,63 @@ Keys = {
 
 
 Citizen.CreateThread(function()
+        while ESX.GetPlayerData() == nil do
+            Wait(0)
+        end
+        PlayerData = ESX.GetPlayerData()
 	while true do
-        local Player = PlayerPedId()
-        local PPos = GetEntityCoords(Player)
-		Citizen.Wait(0)
-        if isPolice == false then
-		if #(PPos - vector3(453.8625, -1017.06, 27.744)) < 5 then
-            DrawMarker(2, lugar.x, lugar.y, lugar.z - 1 , 0, 0, 0, 0, 0, 0, 0.75, 1.00, 0.6001,52,155,0, 200, 0, 0, 0, 0)
-            DrawText3D(453.8625, -1017.06, 27.744 +1, "Pulsa ~y~[E]~w~ para abrir el Garaje")
-			if IsControlJustPressed(1, Keys['E']) and job == 'police' then
-				OpenMenu()
-                elseif IsControlJustPressed(1, Keys['E']) and not job == 'police' then
-                end
-			end
+            local Player = PlayerPedId()
+            local PPos = GetEntityCoords(Player)
+            local _s = 1000
+        if PlayerData.job.name == 'police' then
+            _s = 0
+		    if #(PPos - vector3(453.8625, -1017.06, 27.744)) < 5 then
+                DrawMarker(2, lugar.x, lugar.y, lugar.z - 1 , 0, 0, 0, 0, 0, 0, 0.75, 1.00, 0.6001,52,155,0, 200, 0, 0, 0, 0)
+                if #(PPos - vector3(453.8625, -1017.06, 27.744)) < 3 then
+                    DrawText3D(453.8625, -1017.06, 27.744 +1, "Pulsa ~y~[E]~w~ para abrir el Garaje")
+			        if IsControlJustPressed(1, Keys['E']) then
+				        OpenMenu()
+                    end
+			    end
+            end
 		end
+        Citizen.Wait(_s)
 	end
+end)
+
+RegisterNetEvent('esx:playerLoaded', function(player)
+    PlayerData = player
+end)
+
+RegisterNetEvent('esx:setJob', function(job)
+    PlayerData = ESX.GetPlayerData()
+    PlayerData.job = job
 end)
 
 Citizen.CreateThread(function()
 	while true do
         local Player = PlayerPedId()
         local PPos = GetEntityCoords(Player)
-		Citizen.Wait(0)
-        if isPolice == false then
-		if #(PPos - vector3(462.8166, -1019.99, 27.444)) < 5 then
-            DrawMarker(2, lugar2.x, lugar2.y, lugar2.z - 1 , 0, 0, 0, 0, 0, 0, 0.75, 1.00, 0.6001,52,155,0, 200, 0, 0, 0, 0)
-            DrawText3D(462.8166, -1019.99, 27.444 +1, "Pulsa ~y~[E]~w~ para guardar el Vehículo")
-			if IsControlJustPressed(1, Keys['E']) and job == 'police' then
-                if IsPedInAnyVehicle(Player, false) then
-                    DeleteVehicle(GetVehiclePedIsIn(Player))
+        local _s = 1000
+        if PlayerData.job.name == 'police' then
+		    if #(PPos - vector3(462.8166, -1019.99, 27.444)) < 5 then
+                _s = 0
+                DrawMarker(2, lugar2.x, lugar2.y, lugar2.z - 1 , 0, 0, 0, 0, 0, 0, 0.75, 1.00, 0.6001,52,155,0, 200, 0, 0, 0, 0)
+                if #(PPos - vector3(462.8166, -1019.99, 27.444)) < 3 then
+                    DrawText3D(462.8166, -1019.99, 27.444 +1, "Pulsa ~y~[E]~w~ para guardar el Vehículo")
+			        if IsControlJustReleased(1, 38) then
+                        if IsPedInAnyVehicle(Player, false) then
+                            DeleteVehicle(GetVehiclePedIsIn(Player))
+                        else
+                            ESX.ShowNotification("No estás en ningún vehículo")
+                        end
+                    end
                 end
-                elseif IsControlJustPressed(1, Keys['E']) and not job == 'police' then
-                end
-			end
-		end
-	end
+		    end
+            
+	    end
+        Citizen.Wait(_s)
+    end
 end)
 
 function DrawText3D(x,y,z, text) 
@@ -115,7 +112,7 @@ function OpenMenu()
     ESX.UI.Menu.CloseAll()
 
     ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'garage',{
-        title = 'Vehículos Policia',
+        title = 'Coches Policia',
         align = 'bottom-right',
         elements = vehicles
     },
@@ -138,8 +135,3 @@ function OpenMenu()
         menu.close()
     end)
 end
-
-RegisterNetEvent('esx_policegarage:setJob')
-AddEventHandler('esx_policegarage:setJob',function(jobu)
-	job = jobu
-end)
